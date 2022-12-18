@@ -49,7 +49,7 @@ class Parking:
         count_nodes["regular"] = len(self.regular_nodes)
         return count_nodes
     
-    def car_come(self, car_number: str, permission: Permissions | None) -> int or False:
+    def car_come(self, car_number: str, permission: Permissions | None = None) -> int or False:
         if permission:
             available_priority = self._get_available_priority(permission)
             for node in self.permission_nodes:
