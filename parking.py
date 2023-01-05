@@ -1,4 +1,5 @@
 from entities import PermissionPriorities, Permissions
+from exceptions import ParkingException
 from collections import defaultdict
 
 PRIORITIES_QUEUE = PermissionPriorities(
@@ -17,13 +18,12 @@ class ParkingNode:
                  permission: Permissions | None= None):
         self.number_place:int = number_place
         self.car_number:str | None = car_number
-        self.permission: Permissions | None  = permission
+        self.permission:Permissions | None  = permission
     
-    @property
-    def is_empty(self) -> bool:
-        if self.car_number:
-            return False
-        return True
+    def is_regular(self) -> bool:
+        if self.permission is None:
+            return True
+        return False
     
     def get_node(self, car_number: str) -> int:
         self.car_number = car_number
@@ -49,7 +49,7 @@ class Parking:
         count_nodes["regular"] = len(self.regular_nodes)
         return count_nodes
     
-    def car_come(self, car_number: str, permission: Permissions | None = None) -> int or False:
+    def car_come(self, car_number: str, permission: Permissions | None = None) -> int or ParkingException:
         if permission:
             available_priority = self._get_available_priority(permission)
             for node in self.permission_nodes:
@@ -63,9 +63,9 @@ class Parking:
             self.regular_nodes.remove(node)
             return node.get_node(car_number)
 
-        return False # if all nodes in occupied
+        return ParkingException("Has no free places")
 
-    def car_leave(self, car_number: str) -> bool:
+    def car_leave(self, car_number: str) -> int or ParkingException:
         for node in self.occupied_nodes:
             if node.car_number == car_number:
                 node.clean_node
@@ -74,12 +74,26 @@ class Parking:
                 else:
                     self.permission_nodes.append(node)
                 self.occupied_nodes.remove(node)
-                return True
-            return False # if car_number dont found
-
+                return node.number_place
+            return ParkingException(f"Car number: {node.car_number} is not exist")
+        
     def _get_available_priority(self, permission: Permissions) -> list[ParkingNode]:
         available_permission = []
         for permissions in reversed(PRIORITIES_QUEUE):
             available_permission.extend(permissions)
             if permission in permissions:
                 return available_permission
+
+    def add_new_place(self, new_place:dict[str, any])-> dict[str, dict] or ParkingException:
+        regular = new_place.get("regular_nodes")
+        permission = new_place.get("permission_nodes")
+        if regular:
+            for node in regular:
+                self.regular_nodes.append(ParkingNode(number_place=node["number_place"]))
+        if permission:
+            for node in permission:
+                if not Permissions.has_value(node["permission"]):
+                    return ParkingException(f"Invalid permission: {node['permission']}")
+                self.permission_nodes.append(ParkingNode(number_place=node["number_place"],
+                                                    permission=Permissions(node["permission"])))
+        return {"Added": {"regular":regular,"permission": permission}}
