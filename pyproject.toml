@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "parking-services-api"
+version = "0.1.0"
+description = "Sevice for manage car parking"
+authors = ["Hryhorenko Vitalii <hryhorenko.vitalii@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+Flask = "^2.2.2"
+
+[tool.poetry.dev-dependencies]
+mypy = "^0.991"
+isort = "^5.11.4"
+black = "^22.12.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
