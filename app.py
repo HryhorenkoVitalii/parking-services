@@ -14,13 +14,14 @@ def add_parking_nodes():
     result = parking_service.add_new_place(data)
     if isinstance(result, ParkingException):
         return jsonify({"success": False, "msg": str(result)}), 500
-    return jsonify({"success": True, "msg": result}), 200
+    return jsonify({"success": True, "msg": result}), 422
 
 
 @app.route("/car_come")
 def car_come():
-    number: str = request.headers.get("car_number")
-    permission: str | None = request.headers.get("permission")
+    data = request.json
+    number: str = data.get("car_number")
+    permission: str | None = data.get("permission")
     if permission and not Permissions.has_value(permission):
         return jsonify({"success": False, "msg": "Invalid permission"}), 422
 
@@ -34,7 +35,8 @@ def car_come():
 
 @app.route("/car_leave")
 def car_leave():
-    number: str = request.headers.get("car_number")
+    data = request.json
+    number: str = data.get("car_number")
     result = parking_service.car_leave(car_number=number)
     if isinstance(result, ParkingException):
         return jsonify({"success": False, "msg": f"car number not exist"}), 404
