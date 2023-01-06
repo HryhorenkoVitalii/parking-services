@@ -39,7 +39,7 @@ def car_leave():
     number: str = data.get("car_number")
     result = parking_service.car_leave(car_number=number)
     if isinstance(result, ParkingException):
-        return jsonify({"success": False, "msg": f"car number not exist"}), 404
+        return jsonify({"success": False, "msg": str(result)}), 404
     return (
         jsonify({"success": True, "msg": f"parking place number {result} is free"}),
         200,
